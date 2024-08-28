@@ -1,0 +1,27 @@
+import bge
+from mathutils import Vector
+from collections import OrderedDict
+
+class climb(bge.types.KX_PythonComponent):
+    
+    args = OrderedDict([
+        ("Climb ON/OFF", True)
+    ])
+
+    def start(self, args):
+        self.climbOnOff = args['Climb ON/OFF']
+        
+        if self.climbOnOff:
+            self.character = bge.constraints.getCharacter(self.object)
+                
+    def update(self):
+        if self.climbOnOff:
+            self.origin = self.object.worldPosition + (self.object.worldOrientation @ Vector([0,0.45,5]))
+            target = self.origin-Vector([0,0,6])
+            self.obj,self.hit,self.norm = self.object.rayCast(target,self.origin,face=1)
+            
+            bge.render.drawLine(self.origin,target,[0,0,1])
+            
+    def climb(self):
+        if self.object.character.onGround:
+            pass

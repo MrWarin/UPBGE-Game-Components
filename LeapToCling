@@ -1,0 +1,43 @@
+import bge
+from math import sqrt
+from mathutils import Vector
+from collections import OrderedDict
+
+class leaptocling(bge.types.KX_PythonComponent):
+    args = OrderedDict([
+    ])
+
+    def start(self, args):
+        self.point1 = self.object
+        self.point2 = self.object.scene.objects["Point2"]
+        self.point3 = self.object.scene.objects["Point3"]
+        self.vertex_count = 8
+
+    def update(self):
+        distance = sqrt((self.point3.worldPosition.x - self.point1.worldPosition.x)**2 + (self.point3.worldPosition.y - self.point1.worldPosition.y)**2)
+        factor = 0.1
+        diff = distance * factor
+        
+        midpoint = (self.point1.worldPosition + self.point3.worldPosition) / 2
+        
+        self.point2.worldPosition = midpoint
+        self.point2.worldPosition.z = max(self.point1.worldPosition.z, self.point3.worldPosition.z) + diff
+        
+        point_list = []
+
+        for ratio in range(self.vertex_count + 1):
+            ratio = ratio / self.vertex_count
+
+            tangent_line_vertex1 = self.point1.worldPosition.lerp(self.point2.worldPosition, ratio)
+#            bge.render.drawLine(self.point1.worldPosition, self.point2.worldPosition, [1,0,0])
+            
+            tangent_line_vertex2 = self.point2.worldPosition.lerp(self.point3.worldPosition, ratio)
+#            bge.render.drawLine(self.point2.worldPosition, self.point3.worldPosition, [0,0,1])
+            
+            bezier_point = tangent_line_vertex1.lerp(tangent_line_vertex2, ratio)
+#            bge.render.drawLine(tangent_line_vertex1, tangent_line_vertex2, [1,1,1])
+
+            point_list.append(bezier_point)
+
+#        for i in range(len(point_list) - 1):
+#            bge.render.drawLine(point_list[i], point_list[i+1], [1,1,1])
